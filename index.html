@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lanche da Sexta</title>
+<meta name="description" content="Quem traz o lanche da equipe, sexta a sexta.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='5' width='26' height='24' rx='4' fill='%23ffffff' stroke='%2311262E' stroke-width='2'/%3E%3Crect x='3' y='5' width='26' height='8' rx='4' fill='%23F5BE1E'/%3E%3Ctext x='16' y='26' font-family='Arial' font-weight='700' font-size='12' text-anchor='middle' fill='%2311262E'%3ESEX%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Sofia+Sans+Extra+Condensed:wght@600;800;900&display=swap">
+<style>
+/* Layout: one ~880px column. Up top a tear-off calendar sheet beside "who brings it"; below, stacked lists (next Fridays, rotation, snack board, history). */
+:root {
+  --bg: #EDF1F0;
+  --surface: #FFFFFF;
+  --ink: #11262E;
+  --muted: #5A6E75;
+  --line: #D2DCDB;
+  --sun: #F5BE1E;
+  --sun-ink: #2B2000;
+  --sun-soft: #FCF1CB;
+  --stamp: #C8381C;
+  --off: #E2E8E7;
+  --shadow: 0 1px 0 rgba(17, 38, 46, .06), 0 10px 28px -14px rgba(17, 38, 46, .35);
+  --font-display: "Sofia Sans Extra Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0D191E; --surface: #14242A; --ink: #E4ECEC; --muted: #8FA3A9; --line: #24383F;
+    --sun: #F2B90F; --sun-ink: #241B00; --sun-soft: #2C2912; --stamp: #FF6B4A; --off: #1A2C32;
+    --shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 12px 30px -14px rgba(0, 0, 0, .7);
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--font-body);
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+.page { max-width: 880px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 72px; display: grid; gap: 44px; }
+
+/* Header */
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
+.brand h1 { margin: 0; font: 900 2.6rem/0.9 var(--font-display); letter-spacing: .01em; text-transform: uppercase; }
+.brand p { margin: 6px 0 0; color: var(--muted); }
+.today-box { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
+.today-box .lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+.today-box strong { font-weight: 600; }
+
+/* Data problems (shown only when dados.js has a mistake) */
+.warn { background: var(--surface); border: 1px solid var(--stamp); border-radius: 12px; padding: 14px 16px; }
+.warn strong { color: var(--stamp); }
+.warn ul { margin: 6px 0 0; padding-left: 20px; }
+
+/* Hero */
+.hero { display: grid; grid-template-columns: minmax(0, 250px) minmax(0, 1fr); gap: 36px; align-items: center; }
+.sheet { position: relative; background: var(--surface); border-radius: 10px 10px 4px 4px; box-shadow: var(--shadow); text-align: center; padding-bottom: 22px; }
+.sheet::after { content: ""; position: absolute; left: 0; right: 0; bottom: -5px; height: 10px;
+  background: radial-gradient(circle at 7px 10px, var(--bg) 5px, transparent 5.5px) 0 0 / 14px 10px repeat-x; }
+.sheet-top { position: relative; background: var(--sun); color: var(--sun-ink); border-radius: 10px 10px 0 0; padding: 26px 12px 10px;
+  font: 800 1.15rem/1 var(--font-display); letter-spacing: .18em; text-transform: uppercase; }
+.sheet-top::before, .sheet-top::after { content: ""; position: absolute; top: 9px; width: 11px; height: 11px; border-radius: 50%;
+  background: var(--bg); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .3); }
+.sheet-top::before { left: 24%; }
+.sheet-top::after { right: 24%; }
+.sheet-day { font: 900 9rem/.86 var(--font-display); font-variant-numeric: tabular-nums; margin-top: 14px; letter-spacing: -.01em; }
+.sheet-month { font: 800 1.2rem/1 var(--font-display); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+.stamp { position: absolute; right: -12px; top: 50%; transform: rotate(-13deg); border: 3px solid var(--stamp); color: var(--stamp);
+  background: var(--surface); font: 900 1.6rem/1 var(--font-display); letter-spacing: .16em; padding: 6px 10px 4px 13px; border-radius: 6px; text-transform: uppercase; }
+@media (prefers-reduced-motion: no-preference) {
+  .stamp { animation: stamp .45s cubic-bezier(.2, 1.5, .4, 1); }
+  @keyframes stamp { from { transform: rotate(-13deg) scale(1.5); } to { transform: rotate(-13deg) scale(1); } }
+}
+.eyebrow { margin: 0; font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
+.hero-text { display: grid; gap: 10px; min-width: 0; }
+.hero-who { margin: 0; font: 900 clamp(3.4rem, 11vw, 6.2rem)/.88 var(--font-display); text-wrap: balance; overflow-wrap: anywhere; }
+.hero-when { margin: 0; font-size: 1.1rem; }
+.hero-when b { font-weight: 600; }
+.hero-note { margin: 0; color: var(--muted); }
+.after { margin-top: 8px; padding-top: 14px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
+.after ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 20px; }
+.after li { display: flex; gap: 8px; align-items: baseline; }
+.after li span { color: var(--muted); font-variant-numeric: tabular-nums; font-size: .9rem; }
+.after li b { font-weight: 500; }
+.after li:first-child b { font-weight: 700; }
+
+/* Sections */
+section > header { margin-bottom: 12px; }
+h2 { margin: 0; font: 800 1.75rem/1 var(--font-display); text-transform: uppercase; letter-spacing: .03em; text-wrap: balance; }
+.sub { margin: 4px 0 0; color: var(--muted); max-width: 62ch; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.empty { padding: 18px; color: var(--muted); margin: 0; }
+
+.rows { list-style: none; margin: 0; padding: 0; }
+.row { display: grid; grid-template-columns: 3.4rem minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+.row.is-next { background: var(--sun-soft); }
+.date { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+.date b { font: 900 2.1rem/.95 var(--font-display); font-variant-numeric: tabular-nums; }
+.date span { font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-top: 2px; }
+.main { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.main .who { font-weight: 600; overflow-wrap: anywhere; }
+.row.is-off .who, .row.is-empty .who { color: var(--muted); font-weight: 500; }
+.main .obs { flex-basis: 100%; color: var(--muted); font-size: .88rem; overflow-wrap: anywhere; }
+.tag { font-size: .7rem; font-weight: 600; letter-spacing: .03em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.tag.auto { border-style: dashed; }
+.tag.today { background: var(--sun); color: var(--sun-ink); border-color: transparent; }
+.more-bar { border-top: 1px solid var(--line); padding: 8px; display: flex; justify-content: center; }
+.btn-link { border: 0; background: none; padding: 6px 4px; color: var(--muted); font-weight: 600; font-size: .9rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.btn-link:hover { color: var(--ink); }
+
+/* Rotation */
+.rot { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.rot li { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 2px 10px; align-items: baseline; padding: 12px 14px; border-top: 1px solid var(--line); margin-top: -1px; }
+.rot .n { grid-row: span 2; font: 900 1.9rem/1 var(--font-display); color: var(--muted); font-variant-numeric: tabular-nums; }
+.rot .nm { font-weight: 600; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; overflow-wrap: anywhere; }
+.rot .meta { font-size: .82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rot li.is-next { background: var(--sun-soft); }
+.rot li.is-next .n { color: var(--ink); }
+.rot-foot { padding: 12px 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: .88rem; margin: 0; }
+
+/* Snack board */
+.board { padding: 8px 18px 14px; }
+.menu { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); column-gap: 40px; }
+.menu li { display: flex; align-items: baseline; gap: 8px; padding: 8px 0; }
+.menu .nm { font-weight: 600; overflow-wrap: anywhere; min-width: 0; }
+.menu .leader { flex: 1; min-width: 16px; border-bottom: 2px dotted var(--line); transform: translateY(-4px); }
+.menu .price { font: 800 1.45rem/1 var(--font-display); font-variant-numeric: tabular-nums; }
+
+details.card > summary { cursor: pointer; padding: 14px 16px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+details.card > summary::-webkit-details-marker { display: none; }
+details.card > summary::after { content: "+"; font: 800 1.4rem/1 var(--font-display); color: var(--muted); }
+details.card[open] > summary::after { content: "–"; }
+details.card[open] > summary { border-bottom: 1px solid var(--line); }
+summary .cnt { color: var(--muted); font-weight: 400; margin-left: 6px; }
+summary > span:first-child { flex: 1; }
+
+.foot { color: var(--muted); font-size: .85rem; max-width: 64ch; margin: 0; }
+.foot code { font-size: .85em; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
+
+@media (max-width: 640px) {
+  .page { gap: 36px; padding-block: 20px 56px; }
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .sheet { width: min(230px, 100%); }
+  .sheet-day { font-size: 7.5rem; }
+  .today-box { align-items: flex-start; text-align: left; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <div class="brand">
+      <h1>Lanche da Sexta</h1>
+      <p>Quem traz o lanche da equipe, sexta a sexta.</p>
+    </div>
+    <div class="today-box">
+      <span class="lbl">Hoje</span>
+      <strong id="today">&nbsp;</strong>
+    </div>
+  </header>
+
+  <div class="warn" id="warn" role="alert" hidden></div>
+
+  <section class="hero" id="hero" aria-live="polite">
+    <div class="sheet" aria-hidden="true">
+      <div class="sheet-top">Sexta-feira</div>
+      <div class="sheet-day">--</div>
+      <div class="sheet-month">&nbsp;</div>
+    </div>
+    <div class="hero-text">
+      <p class="eyebrow">Próximo lanche</p>
+      <p class="hero-when">Carregando a escala…</p>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <h2>Próximas sextas</h2>
+      <p class="sub">Sextas marcadas com “pelo rodízio” seguem a ordem da fila automaticamente.</p>
+    </header>
+    <div class="card" id="proximas"><p class="empty">Carregando…</p></div>
+  </section>
+
+  <section>
+    <header>
+      <h2>Rodízio</h2>
+      <p class="sub">Ordem da fila e quantas vezes cada um já trouxe.</p>
+    </header>
+    <div class="card" id="rodizio"><p class="empty">Carregando…</p></div>
+  </section>
+
+  <section>
+    <header>
+      <h2>Ideias de lanche</h2>
+      <p class="sub">Valores anotados na planilha, para referência.</p>
+    </header>
+    <div class="card"><div class="board" id="ideias"><p class="empty">Carregando…</p></div></div>
+  </section>
+
+  <section>
+    <details class="card">
+      <summary><span>Histórico<span class="cnt" id="hist-count"></span></span></summary>
+      <div id="historico"></div>
+    </details>
+  </section>
+
+  <p class="foot">A página usa a data do seu aparelho para saber qual é a próxima sexta, então ela vira sozinha a cada semana. Para mudar a escala, edite o arquivo <code>dados.js</code> no GitHub.</p>
+</div>
+
+<script src="dados.js"></script>
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const pad = n => String(n).padStart(2, "0");
+  const keyOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const isKey = k => typeof k === "string" && /^\d{4}-\d{2}-\d{2}$/.test(k) && keyOf(parseKey(k)) === k;
+  const parseKey = k => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); };
+  const addDays = (d, n) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() + n); return x; };
+  const today = () => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); };
+  const fridayFrom = d => addDays(d, (5 - d.getDay() + 7) % 7);
+  const daysUntil = (a, b) => Math.round((b - a) / 86400000);
+  const ddmm = k => { const d = parseKey(k); return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}`; };
+  const ddmmyy = k => `${ddmm(k)}/${k.slice(0, 4)}`;
+  const str = v => (typeof v === "string" ? v.trim() : typeof v === "number" ? String(v) : "");
+  const cleanNames = a => Array.isArray(a) ? [...new Set(a.filter(x => typeof x === "string" && x.trim()).map(x => x.trim()))] : [];
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const joinNames = a => a.length <= 1 ? (a[0] || "") : a.slice(0, -1).join(", ") + " e " + a[a.length - 1];
+  const fLong = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+  const fToday = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const fMonth = new Intl.DateTimeFormat("pt-BR", { month: "long" });
+  const fMon = new Intl.DateTimeFormat("pt-BR", { month: "short" });
+  const monShort = d => fMon.format(d).replace(".", "");
+
+  /* ---------- read dados.js ---------- */
+  const raw = window.LANCHE;
+  const problems = [];
+  const entries = new Map();
+  let config = {}, ideias = [];
+  if (!raw || typeof raw !== "object") {
+    problems.push("Não consegui ler o arquivo dados.js. Confira se não falta uma vírgula, aspas ou colchete na última alteração.");
+  } else {
+    const r = raw.rodizio || {};
+    config = { ordem: cleanNames(r.ordem), aPartirDe: str(r.aPartirDe), comecaCom: str(r.comecaCom) };
+    if (config.aPartirDe && !isKey(config.aPartirDe)) problems.push(`rodizio.aPartirDe "${config.aPartirDe}" não é uma data no formato AAAA-MM-DD.`);
+    else if (config.aPartirDe && parseKey(config.aPartirDe).getDay() !== 5) problems.push(`rodizio.aPartirDe ${ddmmyy(config.aPartirDe)} não é sexta-feira.`);
+    if (config.comecaCom && config.ordem.length && !config.ordem.includes(config.comecaCom)) problems.push(`rodizio.comecaCom "${config.comecaCom}" não está na lista ordem; o rodízio começa por ${config.ordem[0]}.`);
+    for (const e of Array.isArray(raw.escala) ? raw.escala : []) {
+      const k = str(e && e.data);
+      if (!isKey(k)) { problems.push(`Data "${k}" na escala não está no formato AAAA-MM-DD.`); continue; }
+      if (parseKey(k).getDay() !== 5) { problems.push(`${ddmmyy(k)} na escala não é sexta-feira.`); continue; }
+      if (entries.has(k)) problems.push(`${ddmmyy(k)} aparece duas vezes na escala; vale a última.`);
+      entries.set(k, e);
+    }
+    ideias = (Array.isArray(raw.ideias) ? raw.ideias : []).map(i => ({ nome: str(i && i.nome), valor: str(i && i.valor) })).filter(i => i.nome);
+  }
+
+  /* ---------- schedule logic ---------- */
+  // Fridays listed in "escala" are used as they are. From rodizio.aPartirDe on, every Friday
+  // not listed takes the next name in rodizio.ordem. A listed lanche on or after that date
+  // still uses up a turn (so a swap doesn't shift anyone); a "semLanche" Friday does not
+  // (so everyone moves one week later).
+  function buildTimeline() {
+    const ordem = config.ordem || [];
+    const anchor = isKey(config.aPartirDe) ? keyOf(fridayFrom(parseKey(config.aPartirDe))) : null;
+    const keys = [...entries.keys()].sort();
+    let startKey = keys[0] || null;
+    if (anchor && (!startKey || anchor < startKey)) startKey = anchor;
+    if (!startKey) return [];
+    let end = addDays(fridayFrom(today()), 7 * 40);
+    const last = keys[keys.length - 1];
+    if (last && parseKey(last) > end) end = parseKey(last);
+    let idx = Math.max(0, ordem.indexOf(config.comecaCom));
+    const out = [];
+    let d = fridayFrom(parseKey(startKey));
+    for (let guard = 0; d <= end && guard < 3000; guard++, d = addDays(d, 7)) {
+      const key = keyOf(d);
+      const e = entries.get(key);
+      const auto = !!anchor && key >= anchor;
+      const pessoas = e ? cleanNames(e.pessoas) : [];
+      if (e && e.semLanche === true) {
+        out.push({ key, tipo: "folga", motivo: str(e.motivo), obs: str(e.obs) });
+      } else if (pessoas.length) {
+        out.push({ key, tipo: "lanche", pessoas, obs: str(e.obs), explicit: true });
+        if (auto) idx++;
+      } else if (auto && ordem.length) {
+        out.push({ key, tipo: "lanche", pessoas: [ordem[idx % ordem.length]], obs: "", explicit: false });
+        idx++;
+      } else {
+        out.push({ key, tipo: "vazio", obs: e ? str(e.obs) : "" });
+      }
+    }
+    return out;
+  }
+
+  function quando(k) {
+    const n = daysUntil(today(), parseKey(k));
+    return n === 0 ? "é hoje" : n === 1 ? "é amanhã" : `daqui a ${n} dias`;
+  }
+  function longDate(k) {
+    const d = parseKey(k);
+    const s = cap(fLong.format(d));
+    return d.getFullYear() !== today().getFullYear() ? `${s} de ${d.getFullYear()}` : s;
+  }
+
+  /* ---------- rendering ---------- */
+  let todayKey = "", timeline = [], showMore = false;
+
+  function render() {
+    todayKey = keyOf(today());
+    $("#today").textContent = cap(fToday.format(today()));
+    const w = $("#warn");
+    w.hidden = !problems.length;
+    w.innerHTML = problems.length ? `<strong>Tem algo para corrigir no dados.js</strong><ul>${problems.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : "";
+    timeline = buildTimeline();
+    renderHero();
+    renderUpcoming();
+    renderRodizio();
+    renderHistory();
+    renderIdeias();
+  }
+
+  function sheetHtml(k, isToday) {
+    if (!k) return `<div class="sheet" aria-hidden="true"><div class="sheet-top">Sexta-feira</div><div class="sheet-day">?</div><div class="sheet-month">&nbsp;</div></div>`;
+    const d = parseKey(k);
+    return `<div class="sheet" aria-hidden="true">
+      <div class="sheet-top">Sexta-feira</div>
+      <div class="sheet-day">${pad(d.getDate())}</div>
+      <div class="sheet-month">${esc(fMonth.format(d))} ${d.getFullYear()}</div>
+      ${isToday ? '<div class="stamp">Hoje</div>' : ""}
+    </div>`;
+  }
+
+  function renderHero() {
+    const up = timeline.filter(i => i.key >= todayKey);
+    const next = up.find(i => i.tipo === "lanche");
+    if (!next) {
+      $("#hero").innerHTML = sheetHtml(null) + `<div class="hero-text">
+        <p class="eyebrow">Próximo lanche</p>
+        <p class="hero-who">Ninguém na fila</p>
+        <p class="hero-when">Coloque as pessoas em <b>rodizio.ordem</b> no arquivo dados.js.</p>
+      </div>`;
+      return;
+    }
+    const isToday = next.key === todayKey;
+    const skipped = up.filter(i => i.key < next.key && i.tipo !== "lanche");
+    const skipTxt = skipped.length
+      ? `Sem lanche em ${joinNames(skipped.map(i => ddmm(i.key) + (i.motivo ? ` (${i.motivo})` : "")))}.`
+      : "";
+    const after = up.filter(i => i.key > next.key && i.tipo === "lanche").slice(0, 3);
+    $("#hero").innerHTML = sheetHtml(next.key, isToday) + `<div class="hero-text">
+      <p class="eyebrow">${isToday ? "Hoje é dia de lanche" : "Próximo lanche"}</p>
+      <p class="hero-who">${esc(joinNames(next.pessoas))}</p>
+      <p class="hero-when"><b>${esc(longDate(next.key))}</b> · ${quando(next.key)}</p>
+      ${next.obs ? `<p class="hero-note">${esc(next.obs)}</p>` : ""}
+      ${skipTxt ? `<p class="hero-note">${esc(skipTxt)}</p>` : ""}
+      ${after.length ? `<div class="after"><p class="eyebrow">${isToday ? "Próximas sextas" : "Depois"}</p><ol>
+        ${after.map(i => `<li><b>${esc(joinNames(i.pessoas))}</b><span>${ddmm(i.key)}</span></li>`).join("")}
+      </ol></div>` : ""}
+    </div>`;
+  }
+
+  function rowHtml(it, { past = false, nextKey = null } = {}) {
+    const d = parseKey(it.key);
+    const yr = d.getFullYear() !== today().getFullYear() ? ` ’${String(d.getFullYear()).slice(2)}` : "";
+    const tags = [];
+    if (it.key === todayKey) tags.push(`<span class="tag today">hoje</span>`);
+    let who, cls = "";
+    if (it.tipo === "lanche") {
+      who = esc(joinNames(it.pessoas));
+      if (!it.explicit) tags.push(`<span class="tag auto">pelo rodízio</span>`);
+      if (it.key === nextKey) cls = "is-next";
+    } else if (it.tipo === "folga") {
+      who = "Sem lanche" + (it.motivo ? ` · ${esc(it.motivo)}` : "");
+      cls = "is-off";
+    } else {
+      who = past ? "Sem lanche" : "Ninguém marcado";
+      cls = "is-empty";
+    }
+    return `<li class="row ${cls}">
+      <div class="date"><b>${pad(d.getDate())}</b><span>${esc(monShort(d))}${yr}</span></div>
+      <div class="main"><span class="who">${who}</span>${tags.join("")}${it.obs ? `<span class="obs">${esc(it.obs)}</span>` : ""}</div>
+    </li>`;
+  }
+
+  function renderUpcoming() {
+    const up = timeline.filter(i => i.key >= todayKey);
+    if (!up.length) { $("#proximas").innerHTML = `<p class="empty">Nenhuma sexta marcada ainda.</p>`; return; }
+    const nextKey = (up.find(i => i.tipo === "lanche") || {}).key;
+    const list = up.slice(0, showMore ? 26 : 8);
+    $("#proximas").innerHTML = `<ul class="rows">${list.map(i => rowHtml(i, { nextKey })).join("")}</ul>
+      ${up.length > 8 ? `<div class="more-bar"><button class="btn-link" type="button" id="more">${showMore ? "Mostrar menos" : "Mostrar mais sextas"}</button></div>` : ""}`;
+    const more = $("#more");
+    if (more) more.onclick = () => { showMore = !showMore; renderUpcoming(); $("#more").focus(); };
+  }
+
+  function renderRodizio() {
+    const ordem = config.ordem || [];
+    const tally = new Map();
+    for (const it of timeline) {
+      if (it.key >= todayKey || it.tipo !== "lanche") continue;
+      for (const p of it.pessoas) { const r = tally.get(p) || { n: 0, last: null }; r.n++; r.last = it.key; tally.set(p, r); }
+    }
+    const next = timeline.find(i => i.key >= todayKey && i.tipo === "lanche");
+    const nextNames = next ? next.pessoas : [];
+    if (!ordem.length) { $("#rodizio").innerHTML = `<p class="empty">Ninguém no rodízio ainda.</p>`; return; }
+    const meta = n => { const r = tally.get(n); return r ? `${r.n}× · última ${ddmm(r.last)}` : "ainda não trouxe"; };
+    const outros = [...tally.keys()].filter(n => !ordem.includes(n));
+    const anchor = isKey(config.aPartirDe) ? config.aPartirDe : null;
+    const comeca = ordem.includes(config.comecaCom) ? config.comecaCom : ordem[0];
+    $("#rodizio").innerHTML = `<ol class="rot">${ordem.map((n, i) => `<li class="${nextNames.includes(n) ? "is-next" : ""}">
+        <span class="n">${i + 1}</span>
+        <span class="nm">${esc(n)}${nextNames.includes(n) ? `<span class="tag today">${next.key === todayKey ? "hoje" : "próximo"}</span>` : ""}</span>
+        <span class="meta">${meta(n)}</span></li>`).join("")}</ol>
+      <p class="rot-foot">${anchor ? `A partir de ${ddmmyy(anchor)}, as sextas que não estão na escala seguem esta ordem, começando por ${esc(comeca)}. ` : ""}Uma sexta sem lanche empurra a fila uma semana; uma troca entre duas pessoas não muda a ordem.${outros.length ? ` Fora do rodízio: ${esc(joinNames(outros.map(n => `${n} (${tally.get(n).n}×)`)))}.` : ""}</p>`;
+  }
+
+  function renderHistory() {
+    const past = timeline.filter(i => i.key < todayKey).reverse();
+    const n = past.filter(i => i.tipo === "lanche").length;
+    $("#hist-count").textContent = past.length ? `${n} lanches em ${past.length} sextas` : "";
+    $("#historico").innerHTML = past.length
+      ? `<ul class="rows">${past.map(i => rowHtml(i, { past: true })).join("")}</ul>`
+      : `<p class="empty">Nenhuma sexta passada ainda.</p>`;
+  }
+
+  function renderIdeias() {
+    $("#ideias").innerHTML = ideias.length
+      ? `<ul class="menu">${ideias.map(i => `<li><span class="nm">${esc(i.nome)}</span><span class="leader"></span><span class="price">${esc(i.valor)}</span></li>`).join("")}</ul>`
+      : `<p class="empty">Nenhuma ideia anotada ainda.</p>`;
+  }
+
+  // The date moves on its own: re-check every minute and whenever the tab comes back.
+  setInterval(() => { if (keyOf(today()) !== todayKey) render(); }, 60000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && keyOf(today()) !== todayKey) render(); });
+  render();
+})();
+</script>
+</body>
+</html>
