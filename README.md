@@ -6,7 +6,7 @@ vira sozinha toda semana.
 
 ## Arquivos
 
-- `index.html`: a página (não precisa mexer).
+- `index.html`: a página (não precisa mexer). 
 - `dados.js`: a escala, o rodízio e as ideias de lanche. **É só este que você edita.**
 
 ## Publicar no GitHub Pages (uma vez só)
