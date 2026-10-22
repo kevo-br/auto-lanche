@@ -22,6 +22,10 @@
   --sun-soft: #FCF1CB;
   --stamp: #C8381C;
   --off: #E2E8E7;
+  --yes: #1E7F47;
+  --on-yes: #FFFFFF;
+  --no: #B23A25;
+  --no-soft: #F8E2DD;
   --shadow: 0 1px 0 rgba(17, 38, 46, .06), 0 10px 28px -14px rgba(17, 38, 46, .35);
   --font-display: "Sofia Sans Extra Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
   --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -31,6 +35,7 @@
   :root {
     --bg: #0D191E; --surface: #14242A; --ink: #E4ECEC; --muted: #8FA3A9; --line: #24383F;
     --sun: #F2B90F; --sun-ink: #241B00; --sun-soft: #2C2912; --stamp: #FF6B4A; --off: #1A2C32;
+    --yes: #4CC27F; --on-yes: #07210F; --no: #FF8066; --no-soft: #3A201B;
     --shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 12px 30px -14px rgba(0, 0, 0, .7);
     color-scheme: dark;
   }
@@ -126,6 +131,40 @@ h2 { margin: 0; font: 800 1.75rem/1 var(--font-display); text-transform: upperca
 .rot li.is-next .n { color: var(--ink); }
 .rot-foot { padding: 12px 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: .88rem; margin: 0; }
 
+/* Attendance */
+#pres-box > summary { align-items: center; flex-wrap: wrap; font-weight: 400; }
+.pres-sum { flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 22px; min-width: 0; }
+.pres-sum .stat { display: flex; align-items: baseline; gap: 6px; color: var(--muted); }
+.pres-sum .stat b { font: 900 2rem/1 var(--font-display); color: var(--ink); font-variant-numeric: tabular-nums; }
+.pres-sum .stat.yes b { color: var(--yes); }
+.pres-sum .stat.no b { color: var(--no); }
+.tag.open { border-color: var(--yes); color: var(--yes); }
+.pres-bar { display: flex; height: 6px; margin: 14px 16px; border-radius: 999px; overflow: hidden; background: var(--off); }
+.pres-bar span { display: block; height: 100%; transition: width .3s ease; }
+.pres-bar .yes { background: var(--yes); }
+.pres-bar .no { background: var(--no); }
+.plist { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
+.prow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 10px 14px; border-top: 1px solid var(--line); margin-top: -1px; min-width: 0; }
+.pname { font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; overflow-wrap: anywhere; }
+.prow.is-no .pname { color: var(--muted); font-weight: 500; }
+.pbtns { display: inline-flex; gap: 6px; }
+.pbtn { border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: .85rem; cursor: pointer; }
+.pbtn:hover { color: var(--ink); border-color: var(--muted); }
+.pbtn.yes[aria-pressed="true"] { background: var(--yes); border-color: var(--yes); color: var(--on-yes); }
+.pbtn.no[aria-pressed="true"] { background: var(--no-soft); border-color: var(--no); color: var(--no); }
+.prow.busy .pbtn { cursor: progress; opacity: .7; }
+.pbtn:disabled { cursor: not-allowed; }
+.pbtn:disabled:not([aria-pressed="true"]) { opacity: .45; }
+.pbtn:disabled:hover { color: var(--muted); border-color: var(--line); }
+.pbtn.yes:disabled[aria-pressed="true"]:hover { color: var(--on-yes); border-color: var(--yes); }
+.pbtn.no:disabled[aria-pressed="true"]:hover { color: var(--no); border-color: var(--no); }
+.pres-foot { margin: 0; padding: 10px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .82rem; }
+.pres-foot.err { color: var(--stamp); font-weight: 600; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 30;
+  background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 600; font-size: .9rem; max-width: calc(100% - 32px); box-shadow: var(--shadow); }
+.toast.err { background: var(--stamp); color: #fff; }
+
 /* Snack board */
 .board { padding: 8px 18px 14px; }
 .menu { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); column-gap: 40px; }
@@ -183,6 +222,17 @@ summary > span:first-child { flex: 1; }
 
   <section>
     <header>
+      <h2>Quem vai estar</h2>
+      <p class="sub" id="pres-sub">Lista de presença do próximo lanche.</p>
+    </header>
+    <details class="card" id="pres-box">
+      <summary id="pres-count"><span class="pres-sum"><span class="stat">Carregando…</span></span></summary>
+      <div id="presenca"></div>
+    </details>
+  </section>
+
+  <section>
+    <header>
       <h2>Próximas sextas</h2>
       <p class="sub">Sextas marcadas com “pelo rodízio” seguem a ordem da fila automaticamente.</p>
     </header>
@@ -214,6 +264,7 @@ summary > span:first-child { flex: 1; }
 
   <p class="foot">A página usa a data do seu aparelho para saber qual é a próxima sexta, então ela vira sozinha a cada semana. Para mudar a escala, edite o arquivo <code>dados.js</code> no GitHub.</p>
 </div>
+<div class="toast" id="toast" role="status" hidden></div>
 
 <script src="dados.js"></script>
 <script>
@@ -245,6 +296,14 @@ summary > span:first-child { flex: 1; }
   const problems = [];
   const entries = new Map();
   let config = {}, ideias = [];
+  const pcfg = { url: "", key: "", participantes: [] };
+  // The page must only ever hold Supabase's public key (anon / publishable).
+  const isSecretKey = k => {
+    if (/^sb_secret_/i.test(k)) return true;
+    if (!k.startsWith("eyJ")) return false;
+    try { return JSON.parse(atob(k.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).role === "service_role"; }
+    catch { return false; }
+  };
   if (!raw || typeof raw !== "object") {
     problems.push("Não consegui ler o arquivo dados.js. Confira se não falta uma vírgula, aspas ou colchete na última alteração.");
   } else {
@@ -261,6 +320,18 @@ summary > span:first-child { flex: 1; }
       entries.set(k, e);
     }
     ideias = (Array.isArray(raw.ideias) ? raw.ideias : []).map(i => ({ nome: str(i && i.nome), valor: str(i && i.valor) })).filter(i => i.nome);
+    const p = raw.presenca || {};
+    pcfg.url = str(p.supabaseUrl).replace(/\/+$/, "");
+    pcfg.key = str(p.supabaseChave);
+    pcfg.participantes = cleanNames(raw.participantes);
+    if (pcfg.url && !/^https:\/\/[^\s/]+$/.test(pcfg.url)) {
+      problems.push(`presenca.supabaseUrl "${pcfg.url}" não parece o endereço do projeto (exemplo: https://abcdefgh.supabase.co).`);
+      pcfg.url = "";
+    }
+    if (pcfg.key && isSecretKey(pcfg.key)) {
+      problems.push("presenca.supabaseChave está com a chave SECRETA do Supabase. Troque pela chave pública (publishable ou anon) e gere uma nova chave secreta no painel do Supabase, porque esta já ficou visível.");
+      pcfg.key = "";
+    }
   }
 
   /* ---------- schedule logic ---------- */
@@ -322,6 +393,7 @@ summary > span:first-child { flex: 1; }
     w.innerHTML = problems.length ? `<strong>Tem algo para corrigir no dados.js</strong><ul>${problems.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : "";
     timeline = buildTimeline();
     renderHero();
+    renderPresenca();
     renderUpcoming();
     renderRodizio();
     renderHistory();
@@ -438,9 +510,177 @@ summary > span:first-child { flex: 1; }
       : `<p class="empty">Nenhuma ideia anotada ainda.</p>`;
   }
 
+  /* ---------- attendance (Supabase table "presencas") ---------- */
+  // One row per (data, pessoa) with status "confirmado" or "ausente"; no row = no answer yet,
+  // except for whoever brings the snack, who counts as "confirmado" until they say otherwise.
+  // Answers can change only from the Tuesday to the Thursday before that Friday
+  // (supabase.sql enforces the same window on the server).
+  const pres = { key: null, map: new Map(), state: "idle", pending: new Set(), seq: 0, traz: new Set(), aberta: false };
+  const janela = fridayKey => {
+    const f = parseKey(fridayKey), abre = addDays(f, -3), fecha = addDays(f, -1), t = today();
+    return { estado: t < abre ? "antes" : t > fecha ? "depois" : "aberta", abre: keyOf(abre), fecha: keyOf(fecha) };
+  };
+  const efetivo = n => pres.map.get(n) || (pres.traz.has(n) ? "confirmado" : "");
+  const presOn = () => !!(pcfg.url && pcfg.key);
+  const sbHeaders = extra => {
+    const h = { apikey: pcfg.key, ...extra };
+    if (pcfg.key.startsWith("eyJ")) h.Authorization = "Bearer " + pcfg.key; // legacy anon key; new sb_publishable_ keys go in apikey only
+    return h;
+  };
+
+  async function loadPres() {
+    if (!presOn() || !pres.key) return;
+    const key = pres.key, seq = ++pres.seq;
+    try {
+      const r = await fetch(`${pcfg.url}/rest/v1/presencas?select=pessoa,status&data=eq.${key}`, { headers: sbHeaders(), cache: "no-store" });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const rows = await r.json();
+      if (seq !== pres.seq || key !== pres.key) return; // superseded by a newer load or the date moved on
+      const m = new Map();
+      for (const row of Array.isArray(rows) ? rows : []) {
+        const p = str(row && row.pessoa);
+        if (p && (row.status === "confirmado" || row.status === "ausente")) m.set(p, row.status);
+      }
+      for (const p of pres.pending) { if (pres.map.has(p)) m.set(p, pres.map.get(p)); else m.delete(p); } // keep clicks still saving
+      pres.map = m;
+      pres.state = "ok";
+    } catch {
+      if (seq !== pres.seq || key !== pres.key) return;
+      pres.state = "error";
+    }
+    renderPresenca();
+  }
+
+  async function savePres(key, pessoa, status) {
+    const base = `${pcfg.url}/rest/v1/presencas`;
+    const r = status
+      ? await fetch(base, {
+          method: "POST",
+          headers: sbHeaders({ "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal" }),
+          body: JSON.stringify([{ data: key, pessoa, status }]),
+        })
+      : await fetch(`${base}?data=eq.${key}&pessoa=eq.${encodeURIComponent(pessoa)}`, {
+          method: "DELETE",
+          headers: sbHeaders({ Prefer: "return=minimal" }),
+        });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+  }
+
+  function renderPresenca() {
+    const box = $("#presenca"), sum = $("#pres-count");
+    const next = timeline.find(i => i.key >= todayKey && i.tipo === "lanche");
+    if (!next) {
+      $("#pres-sub").textContent = "Lista de presença do próximo lanche.";
+      sum.innerHTML = `<span class="pres-sum"><span class="stat">Nenhum lanche marcado</span></span>`;
+      box.innerHTML = `<p class="empty">Nenhum lanche marcado nas próximas sextas.</p>`;
+      return;
+    }
+    const jan = janela(next.key);
+    pres.aberta = jan.estado === "aberta";
+    pres.traz = new Set(next.pessoas);
+    const doLanche = next.key === todayKey ? "de hoje" : `de ${longDate(next.key).toLowerCase()}`;
+    const janTxt = jan.estado === "aberta" ? `Dá para marcar até quinta, ${ddmm(jan.fecha)}. Clique de novo no mesmo botão para desmarcar.`
+      : jan.estado === "antes" ? `Abre na terça, ${ddmm(jan.abre)}, e fecha na quinta, ${ddmm(jan.fecha)}.`
+      : "A lista já fechou.";
+    $("#pres-sub").textContent = `Para o lanche ${doLanche}. ${janTxt}`;
+    if (!presOn()) {
+      sum.innerHTML = `<span class="pres-sum"><span class="stat">Lista ainda não ligada</span></span>`;
+      box.innerHTML = `<p class="empty">A lista de presença ainda não foi ligada. Siga a parte “Lista de presença” do README.</p>`;
+      return;
+    }
+    if (pres.key !== next.key) {
+      pres.key = next.key; pres.map = new Map(); pres.pending.clear(); pres.state = "loading";
+      loadPres();
+    }
+    const base = pcfg.participantes.length ? pcfg.participantes : (config.ordem || []);
+    const nomes = [...new Set([...base, ...next.pessoas, ...pres.map.keys()])];
+    const yes = nomes.filter(n => efetivo(n) === "confirmado").length;
+    const no = nomes.filter(n => efetivo(n) === "ausente").length;
+    const none = nomes.length - yes - no;
+    const pct = n => nomes.length ? (100 * n / nomes.length).toFixed(2) + "%" : "0%";
+    const pill = jan.estado === "aberta" ? `<span class="tag open">aberta até ${ddmm(jan.fecha)}</span>`
+      : jan.estado === "antes" ? `<span class="tag">abre ${ddmm(jan.abre)}</span>`
+      : `<span class="tag">fechada</span>`;
+    sum.innerHTML = `<span class="pres-sum">
+        <span class="stat yes"><b>${yes}</b> ${yes === 1 ? "confirmado" : "confirmados"}</span>
+        <span class="stat no"><b>${no}</b> ${no === 1 ? "ausente" : "ausentes"}</span>
+        <span class="stat"><b>${none}</b> sem resposta</span>
+      </span>${pill}`;
+    const foot = pres.state === "error"
+      ? `<p class="pres-foot err">Sem conexão com a lista de presença. Tentando de novo…</p>`
+      : pres.state === "loading"
+        ? `<p class="pres-foot">Carregando presenças…</p>`
+        : pres.aberta
+          ? `<p class="pres-foot">A lista atualiza sozinha a cada 20 segundos.</p>`
+          : `<p class="pres-foot">Os botões ficam liberados de terça a quinta da semana do lanche.</p>`;
+    const off = pres.aberta ? "" : " disabled";
+
+    const a = document.activeElement;
+    const keep = a && box.contains(a) && a.dataset && a.dataset.s ? { p: a.dataset.p, s: a.dataset.s } : null;
+    box.innerHTML = `
+      <div class="pres-bar" aria-hidden="true"><span class="yes" style="width:${pct(yes)}"></span><span class="no" style="width:${pct(no)}"></span></div>
+      <ul class="plist">${nomes.map(n => {
+        const s = efetivo(n);
+        const cls = [s === "confirmado" ? "is-yes" : s === "ausente" ? "is-no" : "", pres.pending.has(n) ? "busy" : ""].join(" ");
+        return `<li class="prow ${cls}">
+          <span class="pname">${esc(n)}${pres.traz.has(n) ? `<span class="tag today">traz o lanche</span>` : ""}</span>
+          <span class="pbtns" role="group" aria-label="Presença de ${esc(n)}">
+            <button type="button" class="pbtn yes" data-p="${esc(n)}" data-s="confirmado" aria-pressed="${s === "confirmado"}"${off}>Confirmado</button>
+            <button type="button" class="pbtn no" data-p="${esc(n)}" data-s="ausente" aria-pressed="${s === "ausente"}"${off}>Ausente</button>
+          </span>
+        </li>`;
+      }).join("")}</ul>
+      ${foot}`;
+    if (keep) {
+      const b = [...box.querySelectorAll("button[data-s]")].find(x => x.dataset.p === keep.p && x.dataset.s === keep.s);
+      if (b && !b.disabled) b.focus();
+    }
+  }
+
+  // The list starts collapsed; each viewer's open/closed choice is remembered on their device.
+  const presBox = $("#pres-box");
+  try { presBox.open = localStorage.getItem("lanche.presencaAberta") === "1"; } catch {}
+  presBox.addEventListener("toggle", () => { try { localStorage.setItem("lanche.presencaAberta", presBox.open ? "1" : "0"); } catch {} });
+
+  $("#presenca").addEventListener("click", async e => {
+    const b = e.target.closest("button[data-s]");
+    if (!b || b.disabled || !presOn() || !pres.key || !pres.aberta) return;
+    const pessoa = b.dataset.p, key = pres.key;
+    if (pres.pending.has(pessoa)) return;
+    const before = pres.map.get(pessoa) || null;
+    const quer = efetivo(pessoa) === b.dataset.s ? null : b.dataset.s;
+    // Whoever brings the snack is "confirmado" by default, so that state needs no row.
+    const after = pres.traz.has(pessoa) && quer !== "ausente" ? null : quer;
+    if (after === before) return;
+    if (after) pres.map.set(pessoa, after); else pres.map.delete(pessoa);
+    pres.pending.add(pessoa);
+    renderPresenca();
+    try {
+      await savePres(key, pessoa, after);
+    } catch {
+      if (key === pres.key) { if (before) pres.map.set(pessoa, before); else pres.map.delete(pessoa); }
+      toast(`Não deu para salvar a presença de ${pessoa}. Tente de novo.`, true);
+    }
+    pres.pending.delete(pessoa);
+    renderPresenca();
+    loadPres();
+  });
+
+  let toastTimer;
+  function toast(msg, err = false) {
+    const t = $("#toast");
+    t.textContent = msg; t.classList.toggle("err", err); t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, err ? 5000 : 2500);
+  }
+
   // The date moves on its own: re-check every minute and whenever the tab comes back.
+  // The attendance list refreshes every 20 s while the tab is visible.
   setInterval(() => { if (keyOf(today()) !== todayKey) render(); }, 60000);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden && keyOf(today()) !== todayKey) render(); });
+  setInterval(() => { if (!document.hidden) loadPres(); }, 20000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) return;
+    if (keyOf(today()) !== todayKey) render(); else loadPres();
+  });
   render();
 })();
 </script>
