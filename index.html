@@ -144,7 +144,7 @@ h2 { margin: 0; font: 800 1.75rem/1 var(--font-display); text-transform: upperca
 .pres-bar .yes { background: var(--yes); }
 .pres-bar .no { background: var(--no); }
 .plist { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
-.prow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 10px 14px; border-top: 1px solid var(--line); margin-top: -1px; min-width: 0; }
+.prow { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 12px; padding: 10px 14px; border-top: 1px solid var(--line); margin-top: -1px; min-width: 0; }
 .pname { font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; overflow-wrap: anywhere; }
 .prow.is-no .pname { color: var(--muted); font-weight: 500; }
 .pbtns { display: inline-flex; gap: 6px; }
@@ -190,6 +190,14 @@ summary > span:first-child { flex: 1; }
   .sheet { width: min(230px, 100%); }
   .sheet-day { font-size: 7.5rem; }
   .today-box { align-items: flex-start; text-align: left; }
+  /* Attendance on phones: status pill + toggle on top, the three counts in one row below. */
+  #pres-box > summary { gap: 12px; }
+  #pres-count > .tag { order: 1; }
+  #pres-box > summary::after { order: 1; margin-left: auto; }
+  #pres-count > .pres-sum { order: 2; flex: 0 0 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .pres-sum .stat { flex-direction: column; align-items: flex-start; gap: 2px; font-size: .82rem; }
+  .prow { padding: 10px 12px; }
+  .pbtn { padding: 6px 10px; }
 }
 </style>
 </head>
@@ -247,10 +255,10 @@ summary > span:first-child { flex: 1; }
     <div class="card" id="rodizio"><p class="empty">Carregando…</p></div>
   </section>
 
-  <section>
+  <section id="sec-ideias" hidden>
     <header>
       <h2>Ideias de lanche</h2>
-      <p class="sub">Valores anotados na planilha, para referência.</p>
+      <p class="sub">Sugestões para quem estiver sem ideia do que trazer.</p>
     </header>
     <div class="card"><div class="board" id="ideias"><p class="empty">Carregando…</p></div></div>
   </section>
@@ -504,10 +512,12 @@ summary > span:first-child { flex: 1; }
       : `<p class="empty">Nenhuma sexta passada ainda.</p>`;
   }
 
+  // The section only shows when dados.js lists ideas; a value is shown only when one is given.
   function renderIdeias() {
+    $("#sec-ideias").hidden = !ideias.length;
     $("#ideias").innerHTML = ideias.length
-      ? `<ul class="menu">${ideias.map(i => `<li><span class="nm">${esc(i.nome)}</span><span class="leader"></span><span class="price">${esc(i.valor)}</span></li>`).join("")}</ul>`
-      : `<p class="empty">Nenhuma ideia anotada ainda.</p>`;
+      ? `<ul class="menu">${ideias.map(i => `<li><span class="nm">${esc(i.nome)}</span>${i.valor ? `<span class="leader"></span><span class="price">${esc(i.valor)}</span>` : ""}</li>`).join("")}</ul>`
+      : "";
   }
 
   /* ---------- attendance (Supabase table "presencas") ---------- */
