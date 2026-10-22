@@ -78,4 +78,17 @@ window.LANCHE = {
     { nome: "Sanduíches", valor: "54" },
   ],
 
+  // Lista de presença ("Quem vai estar"), guardada no Supabase.
+  // Veja a parte "Lista de presença" do README para criar o banco.
+  // Use SÓ a chave pública ("publishable", começa com sb_publishable_, ou a "anon public").
+  // NUNCA coloque aqui a chave "secret" / "service_role".
+  presenca: {
+    supabaseUrl: "",    // exemplo: "https://abcdefghijkl.supabase.co"
+    supabaseChave: "",  // exemplo: "sb_publishable_..."
+  },
+
+  // Quem aparece na lista de presença. Se ficar vazio [], usa a ordem do rodízio.
+  // Exemplo: ["Janela", "Renato", "Kevin", "Ricardo"]
+  participantes: [],
+
 };
