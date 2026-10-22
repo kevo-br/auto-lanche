@@ -70,13 +70,7 @@ window.LANCHE = {
   ],
 
   // Ideias de lanche com os valores anotados na planilha.
-  ideias: [
-    { nome: "Cuca", valor: "30" },
-    { nome: "Pizza", valor: "27" },
-    { nome: "Salgadinho", valor: "60" },
-    { nome: "Bolo", valor: "20/30" },
-    { nome: "Sanduíches", valor: "54" },
-  ],
+  ideias: [],
 
   // Lista de presença ("Quem vai estar"), guardada no Supabase.
   // Veja a parte "Lista de presença" do README para criar o banco.
