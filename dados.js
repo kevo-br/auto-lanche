@@ -83,7 +83,7 @@ window.LANCHE = {
   // Use SÓ a chave pública ("publishable", começa com sb_publishable_, ou a "anon public").
   // NUNCA coloque aqui a chave "secret" / "service_role".
   presenca: {
-    supabaseUrl: "https://rglpbrlrntzppfeophys.supabase.co/rest/v1/",    // exemplo: "https://abcdefghijkl.supabase.co"
+    supabaseUrl: "https://rglpbrlrntzppfeophys.supabase.co",    // exemplo: "https://abcdefghijkl.supabase.co"
     supabaseChave: "sb_publishable_9c5LU_jfO0eHQsBaqTKhSw_4F5fJA0r",  // exemplo: "sb_publishable_..."
   },
 
