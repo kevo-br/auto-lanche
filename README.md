@@ -1,3 +1,4 @@
+[README.md](https://github.com/user-attachments/files/33825313/README.md)
 # Lanche da Sexta
 
 Página que mostra quem traz o lanche da equipe na próxima sexta, a data e o rodízio.
@@ -6,8 +7,9 @@ vira sozinha toda semana.
 
 ## Arquivos
 
-- `index.html`: a página (não precisa mexer). 
-- `dados.js`: a escala, o rodízio e as ideias de lanche. **É só este que você edita.**
+- `index.html`: a página (não precisa mexer).
+- `dados.js`: a escala, o rodízio, as ideias de lanche e a configuração da lista de presença. **É só este que você edita.**
+- `supabase.sql`: cria a tabela da lista de presença no Supabase (usado uma vez só).
 
 ## Publicar no GitHub Pages (uma vez só)
 
@@ -60,3 +62,60 @@ página mostra um aviso vermelho dizendo o que corrigir.
   Essas sextas aparecem com a etiqueta "pelo rodízio".
 - Uma sexta com `semLanche: true` depois dessa data empurra a fila uma semana.
 - Uma troca entre duas pessoas não muda a ordem de ninguém.
+
+## Lista de presença ("Quem vai estar")
+
+Cada pessoa marca **Confirmado** ou **Ausente** para o próximo lanche. Clicar de
+novo no mesmo botão desmarca. A lista vira sozinha para a sexta seguinte, junto
+com o resto da página. As respostas ficam guardadas num banco gratuito do Supabase.
+
+- A lista começa fechada (retraída). Clique nela para abrir; cada pessoa tem a
+  sua escolha de aberta ou fechada lembrada no próprio aparelho.
+- Os botões só funcionam **de terça a quinta** da semana do lanche. Fora disso,
+  dá para ver as respostas, mas não mudar. O banco aplica a mesma regra.
+- Quem traz o lanche já aparece como **Confirmado**, mas pode mudar para Ausente.
+
+### Ligar a lista (uma vez só)
+
+1. Crie uma conta em https://supabase.com e clique em **New project**. O plano
+   Free basta. Em região, escolha **South America (São Paulo)**.
+2. Com o projeto aberto, vá em **SQL Editor**, clique em **New query**, cole todo
+   o conteúdo de `supabase.sql` e clique em **Run**. Deve aparecer
+   "Success. No rows returned".
+3. Pegue o endereço e a chave pública: botão **Connect** no topo do painel, ou
+   **Project Settings → API Keys**.
+   - **Project URL**: algo como `https://abcdefghijkl.supabase.co`
+   - **Publishable key**: começa com `sb_publishable_`. Em projetos antigos,
+     use a **anon public**, que começa com `eyJ`.
+4. No `dados.js`, preencha o bloco `presenca` e clique em **Commit changes**:
+
+   ```js
+   presenca: {
+     supabaseUrl: "https://abcdefghijkl.supabase.co",
+     supabaseChave: "sb_publishable_...",
+   },
+   ```
+
+> **Nunca** coloque no `dados.js` a chave **secret** / **service_role**. Ela dá
+> acesso total ao banco e o repositório é público. Se isso acontecer por engano,
+> a página mostra um aviso; nesse caso, gere uma chave nova no Supabase.
+
+### Quem aparece na lista
+
+Por padrão aparecem as pessoas do rodízio (`rodizio.ordem`). Para incluir mais
+gente, como quem não traz lanche mas participa, preencha `participantes`:
+
+```js
+participantes: ["Janela", "Renato", "Kevin", "Ricardo"],
+```
+
+### Bom saber
+
+- Não tem login: qualquer pessoa com o link consegue marcar qualquer nome. Para
+  uma lista de lanche isso costuma bastar. A chave pública fica visível no site,
+  e isso é normal no Supabase: o que ela pode fazer é limitado pelas regras do
+  `supabase.sql`.
+- Para ver ou apagar respostas, use o **Table Editor** do Supabase, tabela `presencas`.
+- No plano Free, o Supabase pausa projetos que ficam uma semana sem nenhum uso.
+  Se a lista parar de funcionar depois de um tempo parado, entre no painel do
+  Supabase e clique em **Restore project**.
