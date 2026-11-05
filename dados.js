@@ -4,7 +4,9 @@
 //  cerca de 1 minuto depois de salvar (Commit changes) no GitHub.
 //
 //  Regras rápidas:
-//  - Datas sempre no formato "AAAA-MM-DD" e sempre numa sexta-feira.
+//  - Datas sempre no formato "AAAA-MM-DD".
+//  - O lanche é na sexta. Se a sexta for feriado, coloque a data do dia
+//    em que o lanche vai ser naquela semana (ex.: quinta "2026-11-19").
 //  - Nomes entre aspas, separados por vírgula: ["Janela", "Renato"]
 //  - Cada linha termina com vírgula.
 // =====================================================================
@@ -26,6 +28,7 @@ window.LANCHE = {
   //   Duas pessoas:    { data: "2026-06-12", pessoas: ["Janela", "Renato"] },
   //   Com observação:  { data: "2026-10-16", pessoas: ["Diego"], obs: "vai trazer cuca" },
   //   Sem lanche:      { data: "2026-12-25", semLanche: true, motivo: "Natal" },
+  //   Sexta feriado:   { data: "2026-11-19", pessoas: ["Renato"], obs: "na quinta, sexta é feriado" },
   //
   // Troca entre duas pessoas: troque os nomes nas duas sextas.
   // Uma sexta sem lanche depois de "aPartirDe" empurra o rodízio uma semana.
@@ -69,7 +72,8 @@ window.LANCHE = {
     { data: "2027-01-01", semLanche: true, motivo: "Ano-Novo" },
   ],
 
-  // Ideias de lanche com os valores anotados na planilha.
+  // Ideias de lanche. Com a lista vazia [], a seção não aparece no site.
+  // Exemplo: ideias: [ { nome: "Cuca" }, { nome: "Pizza" } ],
   ideias: [],
 
   // Lista de presença ("Quem vai estar"), guardada no Supabase.
@@ -77,8 +81,8 @@ window.LANCHE = {
   // Use SÓ a chave pública ("publishable", começa com sb_publishable_, ou a "anon public").
   // NUNCA coloque aqui a chave "secret" / "service_role".
   presenca: {
-    supabaseUrl: "https://rglpbrlrntzppfeophys.supabase.co",    // exemplo: "https://abcdefghijkl.supabase.co"
-    supabaseChave: "sb_publishable_9c5LU_jfO0eHQsBaqTKhSw_4F5fJA0r",  // exemplo: "sb_publishable_..."
+    supabaseUrl: "https://rglpbrlrntzppfeophys.supabase.co",
+    supabaseChave: "sb_publishable_9c5LU_jfO0eHQsBaqTKhSw_4F5fJA0r",
   },
 
   // Quem aparece na lista de presença. Se ficar vazio [], usa a ordem do rodízio.
