@@ -528,7 +528,7 @@ summary > span:first-child { flex: 1; }
       : "";
   }
 
-  /* ---------- attendance (Supabase table "presencas") ---------- */
+  /* ---------- attendance (Supabase table "lanche_presencas") ---------- */
   // One row per (data, pessoa) with status "confirmado" or "ausente"; no row = no answer yet,
   // except for whoever brings the snack, who counts as "confirmado" until they say otherwise.
   // Answers can change from that week's Tuesday until the day before the snack: Tuesday–Thursday
@@ -554,7 +554,7 @@ summary > span:first-child { flex: 1; }
     if (!presOn() || !pres.key) return;
     const key = pres.key, seq = ++pres.seq;
     try {
-      const r = await fetch(`${pcfg.url}/rest/v1/presencas?select=pessoa,status&data=eq.${key}`, { headers: sbHeaders(), cache: "no-store" });
+      const r = await fetch(`${pcfg.url}/rest/v1/lanche_presencas?select=pessoa,status&data=eq.${key}`, { headers: sbHeaders(), cache: "no-store" });
       if (!r.ok) throw new Error("HTTP " + r.status);
       const rows = await r.json();
       if (seq !== pres.seq || key !== pres.key) return; // superseded by a newer load or the date moved on
@@ -574,7 +574,7 @@ summary > span:first-child { flex: 1; }
   }
 
   async function savePres(key, pessoa, status) {
-    const base = `${pcfg.url}/rest/v1/presencas`;
+    const base = `${pcfg.url}/rest/v1/lanche_presencas`;
     const r = status
       ? await fetch(base, {
           method: "POST",
