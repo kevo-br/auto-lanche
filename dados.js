@@ -60,7 +60,7 @@ window.LANCHE = {
     { data: "2026-10-30", pessoas: ["Anderson"] },
     { data: "2026-11-06", pessoas: ["Pablo"] },
     { data: "2026-11-13", pessoas: ["Janela"] },
-    { data: "2026-11-20", pessoas: ["Renato"] },
+    { data: "2026-11-19", pessoas: ["Renato"] },
     { data: "2026-11-27", pessoas: ["Kevin"] },
     { data: "2026-12-04", pessoas: ["Eberton"] },
     { data: "2026-12-11", pessoas: ["Ebraim"] },
