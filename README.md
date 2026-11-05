@@ -1,4 +1,4 @@
-[README.md](https://github.com/user-attachments/files/33825313/README.md)
+[README.md](https://github.com/user-attachments/files/34421727/README.md)
 # Lanche da Sexta
 
 Página que mostra quem traz o lanche da equipe na próxima sexta, a data e o rodízio.
@@ -115,7 +115,7 @@ participantes: ["Janela", "Renato", "Kevin", "Ricardo"],
   uma lista de lanche isso costuma bastar. A chave pública fica visível no site,
   e isso é normal no Supabase: o que ela pode fazer é limitado pelas regras do
   `supabase.sql`.
-- Para ver ou apagar respostas, use o **Table Editor** do Supabase, tabela `presencas`.
+- Para ver ou apagar respostas, use o **Table Editor** do Supabase, tabela `lanche_presencas`.
 - No plano Free, o Supabase pausa projetos que ficam uma semana sem nenhum uso.
   Se a lista parar de funcionar depois de um tempo parado, entre no painel do
   Supabase e clique em **Restore project**.
