@@ -297,6 +297,7 @@ summary > span:first-child { flex: 1; }
   const fToday = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const fMonth = new Intl.DateTimeFormat("pt-BR", { month: "long" });
   const fMon = new Intl.DateTimeFormat("pt-BR", { month: "short" });
+  const fWeekday = new Intl.DateTimeFormat("pt-BR", { weekday: "long" });
   const monShort = d => fMon.format(d).replace(".", "");
 
   /* ---------- read dados.js ---------- */
@@ -323,9 +324,14 @@ summary > span:first-child { flex: 1; }
     for (const e of Array.isArray(raw.escala) ? raw.escala : []) {
       const k = str(e && e.data);
       if (!isKey(k)) { problems.push(`Data "${k}" na escala não está no formato AAAA-MM-DD.`); continue; }
-      if (parseKey(k).getDay() !== 5) { problems.push(`${ddmmyy(k)} na escala não é sexta-feira.`); continue; }
-      if (entries.has(k)) problems.push(`${ddmmyy(k)} aparece duas vezes na escala; vale a última.`);
-      entries.set(k, e);
+      // A date on Monday–Thursday stands in for that week's Friday (e.g. Friday is a holiday).
+      const dow = parseKey(k).getDay();
+      if (dow === 0 || dow === 6) { problems.push(`${ddmmyy(k)} na escala cai num fim de semana.`); continue; }
+      const sexta = keyOf(addDays(parseKey(k), 5 - dow));
+      if (entries.has(sexta)) problems.push(entries.get(sexta).dia === k
+        ? `${ddmmyy(k)} aparece duas vezes na escala; vale a última.`
+        : `${ddmmyy(entries.get(sexta).dia)} e ${ddmmyy(k)} estão na mesma semana; vale a última (${ddmmyy(k)}).`);
+      entries.set(sexta, { ...e, dia: k });
     }
     ideias = (Array.isArray(raw.ideias) ? raw.ideias : []).map(i => ({ nome: str(i && i.nome), valor: str(i && i.valor) })).filter(i => i.nome);
     const p = raw.presenca || {};
@@ -361,9 +367,10 @@ summary > span:first-child { flex: 1; }
     const out = [];
     let d = fridayFrom(parseKey(startKey));
     for (let guard = 0; d <= end && guard < 3000; guard++, d = addDays(d, 7)) {
-      const key = keyOf(d);
-      const e = entries.get(key);
-      const auto = !!anchor && key >= anchor;
+      const sexta = keyOf(d);
+      const e = entries.get(sexta);
+      const key = e ? e.dia : sexta; // the real day, when the snack moved off Friday that week
+      const auto = !!anchor && sexta >= anchor;
       const pessoas = e ? cleanNames(e.pessoas) : [];
       if (e && e.semLanche === true) {
         out.push({ key, tipo: "folga", motivo: str(e.motivo), obs: str(e.obs) });
@@ -412,7 +419,7 @@ summary > span:first-child { flex: 1; }
     if (!k) return `<div class="sheet" aria-hidden="true"><div class="sheet-top">Sexta-feira</div><div class="sheet-day">?</div><div class="sheet-month">&nbsp;</div></div>`;
     const d = parseKey(k);
     return `<div class="sheet" aria-hidden="true">
-      <div class="sheet-top">Sexta-feira</div>
+      <div class="sheet-top">${esc(cap(fWeekday.format(d)))}</div>
       <div class="sheet-day">${pad(d.getDate())}</div>
       <div class="sheet-month">${esc(fMonth.format(d))} ${d.getFullYear()}</div>
       ${isToday ? '<div class="stamp">Hoje</div>' : ""}
@@ -453,6 +460,7 @@ summary > span:first-child { flex: 1; }
     const yr = d.getFullYear() !== today().getFullYear() ? ` ’${String(d.getFullYear()).slice(2)}` : "";
     const tags = [];
     if (it.key === todayKey) tags.push(`<span class="tag today">hoje</span>`);
+    if (d.getDay() !== 5) tags.push(`<span class="tag">${esc(fWeekday.format(d))}</span>`);
     let who, cls = "";
     if (it.tipo === "lanche") {
       who = esc(joinNames(it.pessoas));
@@ -523,13 +531,17 @@ summary > span:first-child { flex: 1; }
   /* ---------- attendance (Supabase table "presencas") ---------- */
   // One row per (data, pessoa) with status "confirmado" or "ausente"; no row = no answer yet,
   // except for whoever brings the snack, who counts as "confirmado" until they say otherwise.
-  // Answers can change only from the Tuesday to the Thursday before that Friday
-  // (supabase.sql enforces the same window on the server).
+  // Answers can change from that week's Tuesday until the day before the snack: Tuesday–Thursday
+  // for a Friday, Tuesday–Wednesday when it moved to Thursday (supabase.sql enforces the same window).
   const pres = { key: null, map: new Map(), state: "idle", pending: new Set(), seq: 0, traz: new Set(), aberta: false };
-  const janela = fridayKey => {
-    const f = parseKey(fridayKey), abre = addDays(f, -3), fecha = addDays(f, -1), t = today();
+  const janela = diaKey => {
+    const d = parseKey(diaKey), t = today();
+    const fecha = addDays(d, -1);
+    const terca = addDays(d, 2 - d.getDay());
+    const abre = terca < fecha ? terca : fecha;
     return { estado: t < abre ? "antes" : t > fecha ? "depois" : "aberta", abre: keyOf(abre), fecha: keyOf(fecha) };
   };
+  const diaNome = k => fWeekday.format(parseKey(k)).replace("-feira", "");
   const efetivo = n => pres.map.get(n) || (pres.traz.has(n) ? "confirmado" : "");
   const presOn = () => !!(pcfg.url && pcfg.key);
   const sbHeaders = extra => {
@@ -589,8 +601,8 @@ summary > span:first-child { flex: 1; }
     pres.aberta = jan.estado === "aberta";
     pres.traz = new Set(next.pessoas);
     const doLanche = next.key === todayKey ? "de hoje" : `de ${longDate(next.key).toLowerCase()}`;
-    const janTxt = jan.estado === "aberta" ? `Dá para marcar até quinta, ${ddmm(jan.fecha)}. Clique de novo no mesmo botão para desmarcar.`
-      : jan.estado === "antes" ? `Abre na terça, ${ddmm(jan.abre)}, e fecha na quinta, ${ddmm(jan.fecha)}.`
+    const janTxt = jan.estado === "aberta" ? `Dá para marcar até ${diaNome(jan.fecha)}, ${ddmm(jan.fecha)}. Clique de novo no mesmo botão para desmarcar.`
+      : jan.estado === "antes" ? `Abre ${diaNome(jan.abre)}, ${ddmm(jan.abre)}, e fecha ${diaNome(jan.fecha)}, ${ddmm(jan.fecha)}.`
       : "A lista já fechou.";
     $("#pres-sub").textContent = `Para o lanche ${doLanche}. ${janTxt}`;
     if (!presOn()) {
@@ -622,7 +634,7 @@ summary > span:first-child { flex: 1; }
         ? `<p class="pres-foot">Carregando presenças…</p>`
         : pres.aberta
           ? `<p class="pres-foot">A lista atualiza sozinha a cada 20 segundos.</p>`
-          : `<p class="pres-foot">Os botões ficam liberados de terça a quinta da semana do lanche.</p>`;
+          : `<p class="pres-foot">Os botões ficam liberados da terça até a véspera do lanche.</p>`;
     const off = pres.aberta ? "" : " disabled";
 
     const a = document.activeElement;
