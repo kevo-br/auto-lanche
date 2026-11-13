@@ -18,7 +18,7 @@ window.LANCHE = {
   // - Pessoa nova: coloque o nome na posição em que ela entra na fila.
   // - Pessoa saiu: apague o nome daqui (o histórico dela continua).
   rodizio: {
-    ordem: ["Kevin", "Gustavo", "Renato", "Janela", "Eberton", "Ebraim", "Diego", "Helen", "Pablo"],
+    ordem: ["Kevin", "Renato", "Gustavo", "Janela", "Eberton", "Ebraim", "Diego", "Helen", "Pablo"],
     aPartirDe: "2027-01-08",
     comecaCom: "Janela",
   },
@@ -63,8 +63,8 @@ window.LANCHE = {
     { data: "2026-10-30", pessoas: ["Anderson"] },
     { data: "2026-11-06", pessoas: ["Pablo"] },
     { data: "2026-11-13", pessoas: ["Kevin"] },
-    { data: "2026-11-19", pessoas: ["Gustavo"] },
-    { data: "2026-11-27", pessoas: ["Renato"] },
+    { data: "2026-11-19", pessoas: ["Renato"] },
+    { data: "2026-11-27", pessoas: ["Gustavo"] },
     { data: "2026-12-04", pessoas: ["Janela"] },
     { data: "2026-12-11", pessoas: ["Eberton"] },
     { data: "2026-12-18", pessoas: ["Ebraim"] },
